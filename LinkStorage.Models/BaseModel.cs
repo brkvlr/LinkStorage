@@ -9,7 +9,7 @@ namespace LinkStorage.Models
     public class BaseModel
     {
         public int Id { get; set; }
-        public Guid guid { get; set; } = Guid.NewGuid();
+        public Guid Guid { get; set; } = Guid.NewGuid();
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public DateTime DateUpdated { get; set; } = DateTime.Now;
         public DateTime DateDeleted { get; set; } = DateTime.Now;
