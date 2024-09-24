@@ -14,7 +14,7 @@ namespace LinkStorage.Models
         public string Email {  get; set; }
         public string Password { get; set; }
         public int UserTypeId { get; set; }
-        public virtual AppUserType UserType { get; set; }
+        public virtual AppUserType UserTypes { get; set; }
         public ICollection<Link> Links { get; set; } = [];
         public ICollection<Comment> Comments { get; set; }
     }
