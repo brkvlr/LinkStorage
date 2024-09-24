@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LinkStorage.Models\LinkStorage.Models.csproj" />
+    <ProjectReference Include="..\LinkStorage.Repository\LinkStorage.Repository.csproj" />
+  </ItemGroup>
+
 </Project>

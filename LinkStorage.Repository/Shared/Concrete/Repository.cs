@@ -11,15 +11,10 @@ using System.Threading.Tasks;
 
 namespace LinkStorage.Repository.Shared.Concrete
 {
-    public class Repository<T> : IRepository<T> where T : BaseModel
+    public class Repository<T>(ApplicationDbContext context) : IRepository<T> where T : BaseModel
     {
-        private readonly ApplicationDbContext _context;
-        private readonly DbSet<T> _dbSet;
-        public Repository(ApplicationDbContext context)
-        {
-            _context = context;
-            _dbSet = context.Set<T>();
-        }
+        private readonly ApplicationDbContext _context = context;
+        private readonly DbSet<T> _dbSet = context.Set<T>();
 
         public T Add(T entity)
         {
@@ -74,16 +69,16 @@ namespace LinkStorage.Repository.Shared.Concrete
             return true;
         }
 
-        public void Save()
-        {
-            _context.SaveChanges();
-        }
-
         public T Update(T entity)
         {
             _dbSet.Update(entity);
             Save();
             return entity;
+        }
+
+        public void Save()
+        {
+            _context.SaveChanges();
         }
     }
 }

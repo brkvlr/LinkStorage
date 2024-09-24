@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LinkStorage.Business\LinkStorage.Business.csproj" />
     <ProjectReference Include="..\LinkStorage.Data\LinkStorage.Data.csproj" />
   </ItemGroup>
 
