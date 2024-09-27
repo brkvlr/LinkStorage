@@ -77,7 +77,6 @@ namespace LinkStorage.Data.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserTypeId = table.Column<int>(type: "int", nullable: false),
-                    UserTypesId = table.Column<int>(type: "int", nullable: false),
                     Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -88,8 +87,8 @@ namespace LinkStorage.Data.Migrations
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Users_UserTypes_UserTypesId",
-                        column: x => x.UserTypesId,
+                        name: "FK_Users_UserTypes_UserTypeId",
+                        column: x => x.UserTypeId,
                         principalTable: "UserTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -195,8 +194,8 @@ namespace LinkStorage.Data.Migrations
                 columns: new[] { "Id", "DateCreated", "DateDeleted", "DateUpdated", "Guid", "IsDeleted", "Name" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1502), new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1512), new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1511), new Guid("861715c5-422b-45df-9ea3-8e08c199028f"), false, "Admin" },
-                    { 2, new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1513), new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1514), new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1514), new Guid("24d2528e-f12a-4a5a-887b-af0eeae3c43a"), false, "User" }
+                    { 1, new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(90), new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(97), new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(97), new Guid("c3367687-87e6-4a89-9526-69a8e436be63"), false, "Admin" },
+                    { 2, new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(111), new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(112), new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(111), new Guid("721b42bb-308f-41b7-be6f-50972415738e"), false, "User" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -230,9 +229,9 @@ namespace LinkStorage.Data.Migrations
                 column: "TagsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_UserTypesId",
+                name: "IX_Users_UserTypeId",
                 table: "Users",
-                column: "UserTypesId");
+                column: "UserTypeId");
         }
 
         /// <inheritdoc />

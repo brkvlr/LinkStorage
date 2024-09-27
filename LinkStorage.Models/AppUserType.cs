@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace LinkStorage.Models
 {
     [Table("UserTypes")]
-    public class AppUserType:BaseModel
+    public class AppUserType : BaseModel
     {
         public string? Name { get; set; }
         public ICollection<AppUser> Users { get; set; }

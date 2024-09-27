@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35219.272
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkStorage.Web", "LinkStorage.Web\LinkStorage.Web.csproj", "{CE224522-A813-4143-B5BF-1942E2CB9806}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkStorage.Web", "LinkStorage.Web\LinkStorage.Web.csproj", "{CE224522-A813-4143-B5BF-1942E2CB9806}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkStorage.Data", "LinkStorage.Data\LinkStorage.Data.csproj", "{3BB0275E-EB08-4E5F-9B16-2DF4DAC85151}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkStorage.Data", "LinkStorage.Data\LinkStorage.Data.csproj", "{3BB0275E-EB08-4E5F-9B16-2DF4DAC85151}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkStorage.Repository", "LinkStorage.Repository\LinkStorage.Repository.csproj", "{507F281B-767B-4F44-9077-01359754765A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkStorage.Repository", "LinkStorage.Repository\LinkStorage.Repository.csproj", "{507F281B-767B-4F44-9077-01359754765A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkStorage.Business", "LinkStorage.Business\LinkStorage.Business.csproj", "{46AEB7F4-A2EE-4230-B154-A3F32B405397}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkStorage.Business", "LinkStorage.Business\LinkStorage.Business.csproj", "{46AEB7F4-A2EE-4230-B154-A3F32B405397}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkStorage.Models", "LinkStorage.Models\LinkStorage.Models.csproj", "{7730E8E3-B441-4ABE-9671-7CDF3E1AA725}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkStorage.Models", "LinkStorage.Models\LinkStorage.Models.csproj", "{7730E8E3-B441-4ABE-9671-7CDF3E1AA725}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkStorage.Utility", "LinkStorage.Utility\LinkStorage.Utility.csproj", "{89AFD3F2-FA96-47BB-BACF-F94278EC0AE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{7730E8E3-B441-4ABE-9671-7CDF3E1AA725}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7730E8E3-B441-4ABE-9671-7CDF3E1AA725}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7730E8E3-B441-4ABE-9671-7CDF3E1AA725}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89AFD3F2-FA96-47BB-BACF-F94278EC0AE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89AFD3F2-FA96-47BB-BACF-F94278EC0AE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89AFD3F2-FA96-47BB-BACF-F94278EC0AE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89AFD3F2-FA96-47BB-BACF-F94278EC0AE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,7 +26,7 @@ namespace LinkStorage.Business.Shared.Concrete
 
         public bool Delete(int id)
         {
-            return _repo.Delete(id);
+            return (_repo.Delete(id));
         }
 
         public IQueryable<T> GetAll()
@@ -46,7 +46,7 @@ namespace LinkStorage.Business.Shared.Concrete
 
         public T GetById(int id)
         {
-           return _repo.GetById(id);
+            return _repo.GetById(id);
         }
 
         public T GetFirstOrDefault(Expression<Func<T, bool>> predicate)

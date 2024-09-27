@@ -60,12 +60,9 @@ namespace LinkStorage.Data.Migrations
                     b.Property<int>("UserTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserTypesId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserTypesId");
+                    b.HasIndex("UserTypeId");
 
                     b.ToTable("Users");
                 });
@@ -104,20 +101,20 @@ namespace LinkStorage.Data.Migrations
                         new
                         {
                             Id = 1,
-                            DateCreated = new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1502),
-                            DateDeleted = new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1512),
-                            DateUpdated = new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1511),
-                            Guid = new Guid("861715c5-422b-45df-9ea3-8e08c199028f"),
+                            DateCreated = new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(90),
+                            DateDeleted = new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(97),
+                            DateUpdated = new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(97),
+                            Guid = new Guid("c3367687-87e6-4a89-9526-69a8e436be63"),
                             IsDeleted = false,
                             Name = "Admin"
                         },
                         new
                         {
                             Id = 2,
-                            DateCreated = new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1513),
-                            DateDeleted = new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1514),
-                            DateUpdated = new DateTime(2024, 9, 25, 2, 16, 7, 436, DateTimeKind.Local).AddTicks(1514),
-                            Guid = new Guid("24d2528e-f12a-4a5a-887b-af0eeae3c43a"),
+                            DateCreated = new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(111),
+                            DateDeleted = new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(112),
+                            DateUpdated = new DateTime(2024, 9, 27, 14, 12, 38, 221, DateTimeKind.Local).AddTicks(111),
+                            Guid = new Guid("721b42bb-308f-41b7-be6f-50972415738e"),
                             IsDeleted = false,
                             Name = "User"
                         });
@@ -297,13 +294,13 @@ namespace LinkStorage.Data.Migrations
 
             modelBuilder.Entity("LinkStorage.Models.AppUser", b =>
                 {
-                    b.HasOne("LinkStorage.Models.AppUserType", "UserTypes")
+                    b.HasOne("LinkStorage.Models.AppUserType", "UserType")
                         .WithMany("Users")
-                        .HasForeignKey("UserTypesId")
+                        .HasForeignKey("UserTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserTypes");
+                    b.Navigation("UserType");
                 });
 
             modelBuilder.Entity("LinkStorage.Models.Comment", b =>

@@ -39,7 +39,7 @@ namespace LinkStorage.Repository.Shared.Concrete
 
         public IQueryable<T> GetAll()
         {
-            return _dbSet.Where(t => t.IsDeleted==false);
+            return _dbSet.Where(t => !t.IsDeleted==false); // !t.IsDeleted ile okunabilirliği artırdık
         }
 
         public IQueryable<T> GetAll(Expression<Func<T, bool>> predicate)
@@ -64,9 +64,14 @@ namespace LinkStorage.Repository.Shared.Concrete
 
         public bool HardDelete(int id)
         {
-            _dbSet.Remove(_dbSet.Find(id));
-            Save();
-            return true;
+            var entity = _dbSet.Find(id);
+            if (entity != null)
+            {
+                _dbSet.Remove(entity);
+                Save();
+                return true;
+            }
+            return false;
         }
 
         public T Update(T entity)
