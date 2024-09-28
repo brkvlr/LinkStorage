@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LinkStorage.Models\LinkStorage.Models.csproj" />
     <ProjectReference Include="..\LinkStorage.Repository\LinkStorage.Repository.csproj" />
     <ProjectReference Include="..\LinkStorage.Utility\LinkStorage.Utility.csproj" />

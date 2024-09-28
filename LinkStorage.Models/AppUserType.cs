@@ -11,6 +11,5 @@ namespace LinkStorage.Models
     public class AppUserType : BaseModel
     {
         public string? Name { get; set; }
-        public ICollection<AppUser> Users { get; set; }
     }
 }

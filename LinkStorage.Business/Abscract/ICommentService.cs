@@ -8,11 +8,8 @@ using System.Threading.Tasks;
 
 namespace LinkStorage.Business.Abscract
 {
-    public interface IUserService : IService<AppUser>
+    public interface ICommentService : IService<Comment>
     {
-        AppUser CheckLogin(AppUser user);
-        Task<AppUser?> AddAsync(AppUser user);
-        AppUser Profile();
-        Task<bool> NewUserPassword(string mail); 
+        IQueryable<Comment> AddComment(Comment comment);
     }
 }

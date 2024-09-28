@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace LinkStorage.Web.Controllers
 {
-    [Authorize] // Tüm controller için yetkilendirme
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly IUserService _userService;
@@ -18,7 +18,7 @@ namespace LinkStorage.Web.Controllers
             _userService = userService;
         }
 
-        [Authorize(Roles ="Admin")]
+
         public IActionResult Index()
         {
             var users = _userService.GetAll();
@@ -35,43 +35,30 @@ namespace LinkStorage.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(AppUser user)
         {
-            // Model state kontrolü
-            if (ModelState.IsValid)
+            if (user != null)
             {
-                // Kullanıcıyı kontrol et
-                AppUser appUser = _userService.CheckLogin(user);
-                if (appUser != null)
+                AppUser appUser = _userService.CheckLogin(user); // Kullanıcıyı kontrol et
+                if (appUser == null) // Kullanıcı bulunduysa
                 {
-                    // Claim'leri oluştur
                     List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, appUser.Id.ToString()),
-                new Claim(ClaimTypes.Email, appUser.Email),
-                new Claim(ClaimTypes.Role, appUser.UserType.Name)
+                new Claim(ClaimTypes.Name, appUser.UserName), // Kullanıcı adını al
+                new Claim(ClaimTypes.Email, appUser.Email),   // E-posta adresini al
+                new Claim(ClaimTypes.Role, appUser.UserType.Name) // Rolü al
             };
 
-                    // Claim kimliğini oluştur
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                    // Oturumu kapat ve yeni oturum aç
-                    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties { IsPersistent = true });
 
-                    // Kullanıcı türüne göre yönlendirme yap
-                    if (appUser.UserType.Name == "Admin")
-                    {
-                        TempData["success"] = "Hoş geldiniz";
-                        return RedirectToAction("Index", "User");
-                    }
-
-                    TempData["success"] = "Hoş geldiniz";
-                    return RedirectToAction("Index", "Home");
+                    // Yönlendirme işlemleri
+                }
+                else
+                {
+                    TempData["error"] = "Kullanıcı Adı ya da Şifreniz Yanlıştır!";
                 }
             }
-
-            // Hatalı giriş durumunda mesajı ayarla
-            TempData["error"] = "Kullanıcı adı ya da şifreniz yanlıştır!";
-            return RedirectToAction("Login"); // Hatalı giriş
+            return RedirectToAction("Login");
         }
 
         [HttpPost]
