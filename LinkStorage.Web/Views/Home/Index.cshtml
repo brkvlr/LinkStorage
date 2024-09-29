@@ -1,8 +1,41 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "User Paneli";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Sosyal Medyana Hoş geldin!</h1>
+    <p>Soldaki menülerden etkileşime geçebilirsin</a>.</p>
 </div>
+
+
+<script src="~/assets/libs/jquery/jquery.min.js"></script>
+<script src="~/assets/libs/toastr/build/toastr.min.js"></script>
+
+
+<script>
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": false,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
+
+    @if (TempData["success"] != null)
+    {
+        <text>
+                toastr["success"]("@TempData["success"].ToString()");
+        </text>
+    }
+
+
+</script>

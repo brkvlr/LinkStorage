@@ -1,9 +1,9 @@
-﻿
+﻿@using System.Security.Claims
+
 <!doctype html>
 <html lang="en">
 
 <head>
-
     <meta charset="utf-8" />
     <title>Link Storage & Linklerini Kaybetme</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,12 +11,17 @@
     <!-- App favicon -->
     <link rel="shortcut icon" href="~/assets/images/favicon.ico">
 
+        <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+    <link href="~/assets/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+
     <!-- Bootstrap Css -->
     <link href="~/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
     <!-- Icons Css -->
     <link href="~/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <!-- App Css-->
     <link href="~/assets/css/app.min.css" id="app-style" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
     @await RenderSectionAsync("Styles", false);
 
 </head>
@@ -89,34 +94,6 @@
                         </div>
                     </div>
 
-                    <div class="dropdown d-inline-block language-switch">
-                        <button type="button" class="btn header-item waves-effect"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <img src="~/assets/images/flags/us.jpg" alt="Header Language" height="16">
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-
-                            <!-- item-->
-                            <a href="javascript:void(0);" class="dropdown-item notify-item">
-                                <img src="~/assets/images/flags/spain.jpg" alt="user-image" class="me-1" height="12"> <span class="align-middle">Spanish</span>
-                            </a>
-
-                            <!-- item-->
-                            <a href="javascript:void(0);" class="dropdown-item notify-item">
-                                <img src="~/assets/images/flags/germany.jpg" alt="user-image" class="me-1" height="12"> <span class="align-middle">German</span>
-                            </a>
-
-                            <!-- item-->
-                            <a href="javascript:void(0);" class="dropdown-item notify-item">
-                                <img src="~/assets/images/flags/italy.jpg" alt="user-image" class="me-1" height="12"> <span class="align-middle">Italian</span>
-                            </a>
-
-                            <!-- item-->
-                            <a href="javascript:void(0);" class="dropdown-item notify-item">
-                                <img src="~/assets/images/flags/russia.jpg" alt="user-image" class="me-1" height="12"> <span class="align-middle">Russian</span>
-                            </a>
-                        </div>
-                    </div>
 
                     <div class="dropdown d-none d-lg-inline-block ms-1">
                         <button type="button" class="btn header-item noti-icon waves-effect"
@@ -336,18 +313,22 @@
                         <li class="menu-title">Menu</li>
 
                         <li>
-                            <a href="index.html">
+                            <a asp-controller="Home" asp-action="Index">
                                 <i class="uil-home-alt"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
 
-                        <li>
-                            <a href="index.html">
-                                <i class="uil-home-alt"></i>
-                                <span>Kullanıcılar</span>
-                            </a>
-                        </li>
+                        @if (User.HasClaim(c => c.Type == "UserTypeId" && c.Value == "1"))
+                        {
+                            <li>
+                                <a asp-controller="User" asp-action="Index">
+                                    <i class="uil-home-alt"></i>
+                                    <span>Kullanıcılar</span>
+                                </a>
+                            </li>
+                        }
+                        
 
 
 
@@ -414,6 +395,8 @@
     <script src="~/assets/libs/node-waves/waves.min.js"></script>
     <script src="~/assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
     <script src="~/assets/libs/jquery.counterup/jquery.counterup.min.js"></script>
+    <script src="~/assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
 
     <!-- App js -->
     <script src="~/assets/js/app.js"></script>

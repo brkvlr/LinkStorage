@@ -18,7 +18,7 @@ namespace LinkStorage.Web.Controllers
             _userService = userService;
         }
 
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             var users = _userService.GetAll();
@@ -26,6 +26,41 @@ namespace LinkStorage.Web.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View(new AppUser());
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> Register(AppUser user)
+        {
+            if (!_userService.IsEmailUnique(user.Email))
+            {
+                ModelState.AddModelError("Email", "Bu e-posta zaten kullanılıyor.");
+                return View(user);
+            }
+
+            if (!_userService.IsUsernameUnique(user.UserName))
+            {
+                ModelState.AddModelError("UserName", "Bu kullanıcı adı zaten kullanılıyor.");
+                return View(user);
+            }
+            if (ModelState.IsValid)
+            {
+                user.UserTypeId = 2;
+                _userService.Add(user);
+
+                // E-posta gönderme işlemi vb.
+                TempData["success"] = "Kayıt başarılı!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(user); // Hatalı durumda kullanıcı bilgilerini geri gönder
+        }
+
+    [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
@@ -35,38 +70,48 @@ namespace LinkStorage.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(AppUser user)
         {
+
             if (user != null)
             {
                 AppUser appUser = _userService.CheckLogin(user); // Kullanıcıyı kontrol et
-                if (appUser == null) // Kullanıcı bulunduysa
+                if (appUser != null) // Kullanıcı bulunduysa
                 {
-                    List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, appUser.Id.ToString()),
-                new Claim(ClaimTypes.Name, appUser.UserName), // Kullanıcı adını al
-                new Claim(ClaimTypes.Email, appUser.Email),   // E-posta adresini al
-                new Claim(ClaimTypes.Role, appUser.UserType.Name) // Rolü al
-            };
+                    List<Claim> claims = new List<Claim>();
+                    claims.Add(new Claim(ClaimTypes.NameIdentifier, appUser.Id.ToString()));
+                    claims.Add(new Claim(ClaimTypes.Email, appUser.Email));
+                    claims.Add(new Claim("UserTypeId", appUser.UserTypeId.ToString()));
+                    claims.Add(new Claim(ClaimTypes.Role, appUser.UserType.Name));
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties { IsPersistent = true });
 
-                    // Yönlendirme işlemleri
-                }
-                else
-                {
-                    TempData["error"] = "Kullanıcı Adı ya da Şifreniz Yanlıştır!";
+                    if (appUser.UserType.Name == "Admin")
+                    {
+                        TempData["success"] = $"Hoşgeldiniz {appUser.UserName}";
+                        return RedirectToAction("Index", "User");
+                    }
+                    if (appUser.UserType.Name == "User")
+                    {
+                        TempData["success"] = $"Hoşgeldiniz {appUser.UserName}";
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                        TempData["success"] = $"Hoşgeldiniz {appUser.UserName}";
+
+                    return RedirectToAction("Index", "Home");
                 }
             }
+            TempData["error"] = "Kullanıcı Adı ya da Şifreniz Yanlış!";
             return RedirectToAction("Login");
         }
 
         [HttpPost]
         public IActionResult Logout()
         {
-            HttpContext.SignOutAsync(); 
+            HttpContext.SignOutAsync();
 
-            return RedirectToAction("Index", "Home"); 
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult GetAll()
@@ -79,22 +124,41 @@ namespace LinkStorage.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add(AppUser user)
         {
-            if (_userService.Add(user) != null)
-                return Ok(new { result = true, message = "Kullanıcı Başarılı Bir Şekilde Oluşturulmuştur.", userId = user.Id });
+            if (ModelState.IsValid)
+            {
+                _userService.Add(user); // Kullanıcıyı kaydet
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
 
-            return Ok(new { result = false, message = "Kullanıcı oluşturulamadı." });
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var user = _userService.GetById(id);
+            return View(user);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(AppUser user)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await _userService.AddAsync(user);
-                return RedirectToAction("Index");
+                var existingUser = _userService.GetById(user.Id);
+                return View(existingUser); // Hata durumunda mevcut kullanıcıyı geri döndür
             }
-            return View(user);
+
+            var existingUserInDb = _userService.GetById(user.Id);
+
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                user.Password = existingUserInDb.Password; // Mevcut şifreyi koru
+            }
+
+             _userService.Update(user);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -115,8 +179,26 @@ namespace LinkStorage.Web.Controllers
         [HttpPost]
         public IActionResult Update(AppUser user)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { result = false, message = "Invalid user data." });
+            }
 
-            return Ok(_userService.Update(user));
+            try
+            {
+                var result = _userService.Update(user);
+                if (result != null)
+                {
+                    return Ok(new { result = true, message = "User updated successfully." });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, new { result = false, message = "An error occurred while updating the user." });
+            }
+
+            return BadRequest(new { result = false, message = "Failed to update user." });
         }
 
         [HttpPost]
@@ -131,24 +213,24 @@ namespace LinkStorage.Web.Controllers
             return View();
         }
 
-        [AllowAnonymous] // Tüm kullanıcılara açık
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Password(string email)
         {
-            // Şifre yenileme isteği
             if (await _userService.NewUserPassword(email))
             {
-                TempData["success"] = "Şifreniz mail adresinize gönderilmiştir.";
-                return RedirectToAction("Index"); // Başarılı ise ana sayfaya yönlendir
+                TempData["success"] = "Şifreniz Mail Adresinize Gönderilmiştir.";
+                return RedirectToAction("index");
+
             }
             else
             {
-                TempData["error"] = "Şifre yenileme işlemi başarısızdır.";
-                return RedirectToAction("Password"); // Hata durumunda tekrar form sayfasına yönlendir
+                TempData["error"] = "Şifre Yenileme İşlemi Başarısızdır.";
+                return RedirectToAction("password");
             }
         }
 
-        [AllowAnonymous]
+            [AllowAnonymous]
         public IActionResult Profile()
         {
             var user = _userService.Profile();

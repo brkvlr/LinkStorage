@@ -24,7 +24,8 @@ namespace LinkStorage.Business.Concrete
 
         public AppUser CheckLogin(AppUser user)
         {
-            return _repository.GetAll().Include(p => p.UserType).FirstOrDefault(p => (p.Email == user.UserName || p.UserName == user.UserName) && p.Password == user.Password);
+            return _repository.GetAll().Include(p => p.UserType).Where(p => (p.Email == user.UserName || p.UserName == user.UserName) && p.Password == user.Password).FirstOrDefault();
+
         }
 
         public async Task<AppUser?> AddAsync(AppUser user)
@@ -32,15 +33,35 @@ namespace LinkStorage.Business.Concrete
             return await Task.Run(() => _repository.Add(user));
         }
 
-        public IQueryable<AppUser> GetAll(string emailOrUsername, string password)
+        public async Task<AppUser?> Register(AppUser user)
         {
-            return _repository.GetAll(u => u.IsDeleted == false && (u.Email == emailOrUsername || u.UserName == emailOrUsername) && u.Password == password)
+            _repository.Add(user);
+            return user;
+
+        }
+
+        public bool IsEmailUnique(string email)
+        {
+            return _repository.GetFirstOrDefault(u => u.Email == email) == null;
+        }
+
+        public bool IsUsernameUnique(string username)
+        {
+            return _repository.GetFirstOrDefault(u => u.UserName == username) == null;
+        }
+
+
+        public IQueryable<AppUser> GetAll()
+        {
+            return _repository.GetAll()
                 .Select(x => new AppUser
                 {
                     Id = x.Id,
+                    UserName = x.UserName,
                     Email = x.Email,
                     Password = x.Password,
-                    UserType = x.UserType
+                    UserType = x.UserType,
+                    IsDeleted = x.IsDeleted
                 });
         }
 
@@ -51,17 +72,24 @@ namespace LinkStorage.Business.Concrete
 
         public async Task<bool> NewUserPassword(string mail)
         {
-            var appUser = _repository.GetFirstOrDefault(u => u.Email == mail);
-            if (appUser != null)
+            var appUser = GetFirstOrDefault(u => u.Email == mail);
+            if (appUser is not null)
             {
                 string newPassword = Helper.RandomPassword(); 
                 appUser.Password = newPassword; 
                 string message = "Merhaba,<br>" +
-                                 "Şifreniz yenilenmiştir.<br>" +
-                                 $"Şifreniz: {newPassword}";
+                    "Şifreniz yenilenmiştir.<br>" +
+                   $"Şifreniz: {newPassword}";
                 _repository.Update(appUser);
 
-                return await HelperMail.SendMail(appUser.Email, "Şifre Yenileme", message);
+                if (await HelperMail.SendMail(appUser.UserName, "Şifre Yenileme", message))
+                {
+
+                    return true;
+
+                }
+
+                return false;
             }
             else
             {

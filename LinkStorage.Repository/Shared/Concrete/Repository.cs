@@ -39,7 +39,7 @@ namespace LinkStorage.Repository.Shared.Concrete
 
         public IQueryable<T> GetAll()
         {
-            return _dbSet.Where(t => !t.IsDeleted==false); // !t.IsDeleted ile okunabilirliği artırdık
+            return _dbSet.Where(t => t.IsDeleted == false);
         }
 
         public IQueryable<T> GetAll(Expression<Func<T, bool>> predicate)

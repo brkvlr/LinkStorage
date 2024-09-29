@@ -12,23 +12,28 @@ namespace LinkStorage.Utility
     {
         public static async Task<bool> SendMail(string mail, string subject, string message)
         {
-            try
-            {
-                MailMessage mailMessage = new MailMessage("mailiniz@gmail.com", mail, subject, message);
+            Console.WriteLine("E-posta gönderme işlemi simüle ediliyor...");
+            Console.WriteLine($"Gönderilen E-posta: {mail}, Konu: {subject}, Mesaj: {message}");
 
-                mailMessage.IsBodyHtml = true;
-                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
-                smtpClient.EnableSsl = true;
-                smtpClient.Credentials = new NetworkCredential("mailiniz@gmail.com", "dzjv xsya fbpy svpv");
+            await Task.Delay(100); // Asenkron bir metot olduğu için bekleme ekledik
+            return true; // Simüle edilen başarılı gönderim
+            //try
+            //{
+            //    MailMessage mailMessage = new MailMessage("info@runawaytr.com", mail, subject, message);
+
+            //    mailMessage.IsBodyHtml = true;
+            //    SmtpClient smtpClient = new SmtpClient("smtp.yandex.com", 465);
+            //    smtpClient.EnableSsl = true;
+            //    smtpClient.Credentials = new NetworkCredential("info@runawaytr.com", "xxx xxx xxx xxx");
 
 
-                await smtpClient.SendMailAsync(mailMessage);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            //    await smtpClient.SendMailAsync(mailMessage);
+            //    return true;
+            //}
+            //catch (Exception ex)
+            //{
+            //    return false;
+            //}
 
         }
     }

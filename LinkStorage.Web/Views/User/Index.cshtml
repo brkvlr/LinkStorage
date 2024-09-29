@@ -1,27 +1,255 @@
-﻿@model IEnumerable<AppUser>
+﻿@model IEnumerable<LinkStorage.Models.AppUser>
 
 @{
-    ViewBag.Title = "Kullanıcı Listesi";
+    ViewData["Title"] = "User Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Kullanıcı Listesi</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Kullanıcılar</h4>
+                    <p class="card-title-desc">Sistemdeki tüm kullanıcıları yönetin.</p>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Kullanıcı Adı</th>
-            <th>Email</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
-            </tr>
+                    <button type="button" class="btn btn-primary waves-effect waves-light mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                        <i class="bx bx-plus font-size-16 align-middle me-2"></i> Yeni Kullanıcı Ekle
+                    </button>
+
+                    <table id="userTable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Kullanıcı Adı</th>
+                                <th>Email</th>
+                                <th>Kullanıcı Tipi</th>
+                                <th>Eylemler</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Edit">
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="UserName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="Password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userTypeId" class="form-label">User Type</label>
+                        <select class="form-select" id="userTypeId" name="UserTypeId" required>
+                            <option value=""disabled selected>Kullanıcı Tipini Seçin</option>
+                            <option value="1">Admin</option>
+                            <option value="2">User</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveNewUser">Save User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId" name="Id">
+                    <div class="mb-3">
+                        <label for="editUserName" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="editUserName" name="UserName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" name="Email" required>
+                    </div>
+                    <div class="mb-3">
+    <label for="editPassword" class="form-label">Password</label>
+    <input type="password" class="form-control" id="editPassword" name="Password">
+    <small class="form-text text-muted">Yeni şifre girmediyseniz mevcut şifre korunacaktır.</small>
+</div>
+                    <div class="mb-3">
+                        <label for="editUserTypeId" class="form-label">User Type</label>
+                        <select class="form-select" id="editUserTypeId" name="UserTypeId" required>
+                            <option value=""disabled selected>Kullanıcı Tipini Seçin</option>
+                            <option value="1">Admin</option>
+                            <option value="2">User</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-primary" id="saveEditUser">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#userTable').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("GetAll", "User")",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "userName" },
+                    { "data": "email" },
+                    { "data": "userType.name" },
+                    {
+                        "data": "id",
+                        "render": function (data, type, row) {
+                            return `<button class="btn btn-primary btn-sm edit-user" 
+                data-id="${row.id}" 
+                data-username="${row.userName}" 
+                data-email="${row.email}" 
+                data-password="${row.password}">Düzenle</button>
+                                            <button class="btn btn-danger btn-sm delete-user" data-id="${data}">Sil</button>`;
+                        }
+                    }
+                ]
+            });
+
+
+
+            // Add New User
+ $('#saveNewUser').click(function () {
+    var formData = $('#addUserModal form').serialize();
+
+    $.ajax({
+        url: '@Url.Action("Add", "User")', // Doğru aksiyona yönlendirdiğinizden emin olun
+        type: 'POST',
+        data: formData,
+        success: function (response) {
+            if (response.success) {
+                // Kullanıcı başarıyla eklendiyse modalı kapat
+                $('#addUserModal').modal('hide');
+                table.ajax.reload();
+                // Başka işlemler (tabloyu güncellemek vb.)
+                alert('User added successfully');
+            } else {
+                // İşlem başarısız olursa kullanıcıya hata göster
+                alert('Failed to add user');
+            }
+        },
+        error: function () {
+            alert('An error occurred while saving the user.');
         }
-    </tbody>
-</table>
+    });
+});
 
+            // Edit User
+$('#userTable').on('click', '.edit-user', function () {
+    var userId = $(this).data('id');
+    $.ajax({
+        url: '@Url.Action("GetById", "User")',
+        type: 'POST',
+        data: { id: userId },
+        success: function (user) {
+            $('#editUserId').val(user.id);
+            $('#editUserName').val(user.userName);
+            $('#editEmail').val(user.email);
+            $('#editUserTypeId').val(user.userTypeId);
 
+            // Şifreyi forma ekleyin
+            $('#editPassword').val(user.password); // Eğer şifre boş değilse
+
+            $('#editUserModal').modal('show');
+        }
+    });
+});
+
+            $('#saveEditUser').click(function () {
+                var formData = $('#editUserForm').serialize();
+        
+                if ($('#editPassword').val() === '') {
+        // Eğer boşsa, mevcut şifreyi kullan
+        var existingPassword = $('#existingPassword').val();
+        formData = formData.replace('Password=', 'Password=' + existingPassword);
+    }
+                $.ajax({
+                    url: '@Url.Action("Update", "User")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (result) {
+                        if (result) {
+                            $('#editUserModal').modal('hide');
+                            table.ajax.reload();
+                            Swal.fire('Başarılı', 'Kullanıcı güncellendi.', 'success');
+                        } else {
+                            Swal.fire('Hata', 'Kullanıcı güncellenemedi', 'error');
+                        }
+                    }
+                });
+            });
+
+            // Delete User
+            $('#userTable').on('click', '.delete-user', function () {
+                var userId = $(this).data('id');
+                Swal.fire({
+                    title: 'Silmek istediğine emin misin?',
+                    text: "Bunu geri alamazsın!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Evet, sil!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("Delete", "User")',
+                            type: 'POST',
+                            data: { id: userId },
+                            success: function (result) {
+                                if (result) {
+                                    table.ajax.reload();
+                                    Swal.fire('Silindi!', 'Kullanıcı silindi.', 'success');
+                                } else {
+                                    Swal.fire('Hata', 'Kullanıcı silinemedi', 'error');
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

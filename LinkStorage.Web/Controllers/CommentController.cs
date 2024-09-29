@@ -32,16 +32,5 @@ namespace LinkStorage.Web.Controllers
             return Ok(comments);
         }
 
-        // Belirli bir yorumu ve onun alt yorumlarını getirir
-        [HttpGet]
-        public IActionResult GetCommentById(int id)
-        {
-            var comment = _commentService.GetCommentById(id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-            return Ok(comment);
-        }
     }
 }
