@@ -4,6 +4,7 @@ using LinkStorage.Business;
 using LinkStorage.Business.Abscract;
 using LinkStorage.Business.Concrete;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using LinkStorage.Business.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddBusinessDI();
 builder.Services.AddRepositoryDI();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

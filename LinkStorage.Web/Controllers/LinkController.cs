@@ -35,30 +35,30 @@ namespace LinkStorage.Web.Controllers
         [HttpPost]
         public IActionResult Add(Link link)
         {
-            if (ModelState.IsValid)
-            {
-                var result = _linkService.AddLink(link);
-                return Ok(result);
-            }
-            return BadRequest("Link verileri geçersiz.");
+            _linkService.Add(link);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
         public IActionResult Update(Link link)
         {
-            if (ModelState.IsValid)
-            {
-                var result = _linkService.Update(link);
-                return Ok(result);
-            }
-            return BadRequest("Link güncellenirken bir hata oluştu.");
+            _linkService.Update(link);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var result = _linkService.Delete(id);
-            return Ok(result);
+            bool isDeleted = _linkService.Delete(id);
+
+            if (isDeleted)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return View("Error");
+            }
         }
     }
 }

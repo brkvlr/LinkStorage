@@ -11,7 +11,7 @@ namespace LinkStorage.Business.Abscract
     {
        public IQueryable<Link> GetAllLinks();
        public Link GetLinkById(int id);
-       public Link AddLink(Link link);
+       public Link Add(Link link);
         public Link Update(Link link);
         public bool Delete(int id);
     }

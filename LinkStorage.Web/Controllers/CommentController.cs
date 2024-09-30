@@ -29,7 +29,7 @@ namespace LinkStorage.Web.Controllers
             }
 
             var comments = _commentService.AddComment(comment); // Yorum eklendikten sonra aynı linke ait tüm yorumlar
-            return Ok(comments);
+            return Ok(comments.ToList()); //Yorumları görüntülemek için bir View döndürüyoruz
         }
 
     }

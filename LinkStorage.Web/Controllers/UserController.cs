@@ -181,24 +181,17 @@ namespace LinkStorage.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(new { result = false, message = "Invalid user data." });
+                return BadRequest(new { result = false, message = "Geçersiz kullanıcı verisi" });
             }
 
-            try
+            var result = _userService.Update(user);
+
+            if (result != null)
             {
-                var result = _userService.Update(user);
-                if (result != null)
-                {
-                    return Ok(new { result = true, message = "User updated successfully." });
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                return StatusCode(500, new { result = false, message = "An error occurred while updating the user." });
+                return Ok(new { result = true, message = "Kullanıcı başarıyla güncellendi" });
             }
 
-            return BadRequest(new { result = false, message = "Failed to update user." });
+            return BadRequest(new { result = false, message = "Kullanıcı güncellenemedi" });
         }
 
         [HttpPost]

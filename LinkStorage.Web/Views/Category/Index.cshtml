@@ -1,0 +1,129 @@
+﻿@model List<LinkStorage.Models.Category>
+
+@{
+    ViewData["Title"] = "Kategoriler";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Kategori Yönetimi</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Kategoriler
+        </div>
+        <div class="card-body">
+            <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                Kategori Ekle
+            </button>
+            <table id="categoriesTable" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Kategori Adı</th>
+                        <th>Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model)
+                    {
+                            <tr>
+                                <td>@category.Id</td>
+                                <td>@category.Name</td>
+                                <td>
+                                <button class="btn btn-warning btn-sm edit-category" data-id="@category.Id" data-name="@category.Name" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Düzenle</button>
+                                    <button class="btn btn-danger btn-sm delete-category" data-id="@category.Id">Sil</button>
+
+                                </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <form id="addCategoryForm" asp-action="Add" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">Kategori Adı</label>
+                        <input type="text" class="form-control" id="Name" name="Name" placeholder="Kategori Adı" required>
+                    </div>
+                    <input type="hidden" name="Id" id="CategoryId" value="0" />
+                    <input type="hidden" name="Links" value="" /> <!-- Gizli alan ekleyin -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#categoriesTable').DataTable();
+
+                $('.delete-category').click(function () {
+                    var categoryId = $(this).data('id');
+                    if (confirm('Bu kategoriyi silmek istediğine emin misin?')) {
+                        $.ajax({
+                            url: '@Url.Action("Delete", "Category")',
+                            type: 'POST',
+                            data: { id: categoryId },
+                            success: function (result) {
+                                location.reload();
+                            },
+                            error: function (error) {
+                                alert('Kategori silinirken bir hata oluştu.');
+                            }
+                        });
+                    }
+                });
+            $('#addCategoryModal').on('hidden.bs.modal', function () {
+                // Formu sıfırlayın
+                $('#addCategoryForm').trigger("reset");
+
+                // Gizli ID alanını sıfırlayın
+                $('#CategoryId').val(0);
+            });
+            $(document).on('click', '.edit-category', function () {
+    var categoryId = $(this).data('id');
+    var categoryName = $(this).data('name');
+
+    // Modal içindeki alanları doldurun
+    $('#addCategoryForm').find('#Name').val(categoryName); // Kategori adını doldur
+    $('#addCategoryForm').find('input[name="Id"]').val(categoryId); // Kategori ID'sini doldur
+});
+
+                $('#addCategoryForm').submit(function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: $(this).attr('action'),
+                        type: $(this).attr('method'),
+                        data: $(this).serialize(),
+                        success: function (result) {
+                            $('#addCategoryModal').modal('hide');
+                            location.reload();
+                        },
+                        error: function (error) {
+                            alert('Kategori eklenirken bir hata oluştu.');
+                        }
+                    });
+                });
+            });
+        </script>
+}

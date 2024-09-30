@@ -26,7 +26,7 @@ namespace LinkStorage.Business.Concrete
             _userService = userService;
         }
 
-        public Link AddLink(Link link)
+        public Link Add(Link link)
         {
             // Kullanıcının kimliğini al
             link.UserId = int.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -61,16 +61,31 @@ namespace LinkStorage.Business.Concrete
                 .FirstOrDefault(x => x.Id == id);
         }
 
-        public Link Update(Link link)
+        public void Update(Link link)
         {
-            _repository.Update(link);
-            _repository.Save(); // Eğer Save metodu varsa
-            return link;
+            var existingLink = _repository.GetFirstOrDefault(x => x.Id == link.Id);
+            if (existingLink != null)
+            {
+                existingLink.Description = link.Description;
+                existingLink.Url = link.Url;
+                existingLink.CategoryId = link.CategoryId;
+                existingLink.Tags = link.Tags;
+                // Diğer gerekli alanlar burada güncellenebilir
+
+                _repository.Update(existingLink);
+            }
         }
 
         public bool Delete(int id)
         {
-            return _repository.Delete(id);
+            var link = _repository.GetFirstOrDefault(x => x.Id == id);
+
+            if (link != null)
+            {
+                return _repository.Delete(id); 
+            }
+
+            return false;
         }
     }
 }

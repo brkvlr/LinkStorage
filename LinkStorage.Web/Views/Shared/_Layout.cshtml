@@ -328,6 +328,16 @@
                                 </a>
                             </li>
                         }
+
+                        @if (User.HasClaim(c => c.Type == "UserTypeId" && c.Value == "1"))
+                        {
+                            <li>
+                                <a asp-controller="Category" asp-action="Index">
+                                    <i class="uil-home-alt"></i>
+                                    <span>Kategoriler</span>
+                                </a>
+                            </li>
+                        }
                         
 
 
