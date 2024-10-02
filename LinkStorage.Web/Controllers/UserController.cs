@@ -106,12 +106,12 @@ namespace LinkStorage.Web.Controllers
             return RedirectToAction("Login");
         }
 
-        [HttpPost]
-        public IActionResult Logout()
+        [AllowAnonymous]
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.SignOutAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login");
         }
 
         public IActionResult GetAll()
