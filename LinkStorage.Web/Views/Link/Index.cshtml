@@ -1,0 +1,175 @@
+﻿@model IEnumerable<LinkStorage.Models.Link>
+
+@{
+    ViewData["Title"] = "Bağlantılar";
+}
+
+<h1>Bağlantılar</h1>
+
+<table id="linksTable" class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Kullanıcı Adı</th>
+            <th>URL</th>
+            <th>Açıklama</th>
+            <th>Kategori</th>
+            <th>Etiketler</th>
+            <th>Yorum Sayısı</th>
+            <th>Tarih</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var link in Model)
+        {
+            <tr>
+                <td>@link.Id</td>
+                <td>@link.User.UserName</td>
+                <td>@link.Url</td>
+                <td>@link.Description</td>
+                <td>@link.Category?.Name</td>
+                <td>
+                    @if (link.Tags != null && link.Tags.Any())
+                    {
+                        foreach (var tag in link.Tags)
+                        {
+                            <span class="badge bg-primary">@tag.Name</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Yok</span>
+                    }
+                </td>
+                <td>@link.Comments.Count()</td>
+                <td>@link.DateCreated.ToString("g")</td>
+                <td>
+                    <button class="btn btn-primary edit-link"
+                            data-id="@link.Id"
+                            data-url="@link.Url"
+                            data-description="@link.Description"
+                            data-categoryid="@link.CategoryId"
+                            data-userid="@link.UserId"
+                            data-tags="@string.Join(",", link.Tags.Select(t => t.Name))">
+                        Düzenle
+                    </button>
+                    <button class="btn btn-danger delete-link" data-id="@link.Id">Sil</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Link Güncelleme Modal -->
+<div class="modal fade" id="updateLinkModal" tabindex="-1" aria-labelledby="updateLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateLinkModalLabel">Linki Güncelle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <form id="updateLinkForm" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="UpdateLinkId" /> <!-- Buraya Id ekledik -->
+                    <div class="mb-3">
+                        <label for="UpdateUrl" class="form-label">URL</label>
+                        <input type="text" class="form-control" id="UpdateUrl" name="Url" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateDescription" class="form-label">Açıklama</label>
+                        <input type="text" class="form-control" id="UpdateDescription" name="Description" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateCategoryId" class="form-label">Kategori</label>
+                        <select class="form-select" id="UpdateCategoryId" name="CategoryId" required>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateTags" class="form-label">Etiketler</label>
+                        <input type="text" class="form-control" id="UpdateTags" name="Tags" placeholder="Etiketleri virgülle ayırarak girin" required>
+                    </div>
+                    <input type="hidden" name="UserId" id="UpdateUserId" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#linksTable').DataTable();
+
+            $(document).on('click', '.edit-link', function () {
+                var linkId = $(this).data('id');
+                var linkUrl = $(this).data('url');
+                var linkDescription = $(this).data('description');
+                var categoryId = $(this).data('categoryid');
+                var userId = $(this).data('userid');
+                var tags = $(this).data('tags'); // Etiketleri al
+
+                // Modal içindeki alanları doldurun
+                $('#updateLinkForm').find('#UpdateLinkId').val(linkId); // Link ID'yi doldur
+                $('#updateLinkForm').find('#UpdateUrl').val(linkUrl);
+                $('#updateLinkForm').find('#UpdateDescription').val(linkDescription);
+                $('#updateLinkForm').find('#UpdateCategoryId').val(categoryId);
+                $('#updateLinkForm').find('#UpdateUserId').val(userId || "");
+                if (tags) {
+                    $('#updateLinkForm').find('#UpdateTags').val(tags); // Tags'ı doldurun
+                }
+
+                // Modal'ı göster
+                $('#updateLinkModal').modal('show');
+            });
+
+            // Silme butonuna tıklama olay dinleyicisi
+            $(document).on('click', '.delete-link', function () {
+                var linkId = $(this).data('id');
+
+                if (confirm('Bu bağlantıyı silmek istediğinize emin misiniz?')) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "Link")', // Silme işlemi için URL
+                        type: 'POST',
+                        data: { id: linkId },
+                        success: function (result) {
+                            location.reload(); // Sayfayı yenileyin
+                        },
+                        error: function (error) {
+                            console.log(error); // Hata mesajını konsola yazdır
+                            alert('Silme sırasında bir hata oluştu.');
+                        }
+                    });
+                }
+            });
+
+            // Formu gönder
+            $('#updateLinkForm').submit(function (e) {
+                e.preventDefault(); // Sayfa yenilenmesini engelle
+                var formData = $(this).serialize(); // Form verilerini seri hale getir
+
+                $.ajax({
+                    url: '@Url.Action("Update", "Link")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (result) {
+                        $('#updateLinkModal').modal('hide');
+                        location.reload(); // Sayfayı yenileyin
+                    },
+                    error: function (error) {
+                        console.log(error); // Hata mesajını konsola yazdır
+                        alert('Güncelleme sırasında bir hata oluştu.');
+                    }
+                });
+            });
+        });
+    </script>
+}

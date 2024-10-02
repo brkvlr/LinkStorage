@@ -17,19 +17,15 @@ namespace LinkStorage.Web.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var comments = _commentService.GetAllComments().ToList();
+            return View(comments);
         }
 
         [HttpPost]
-        public IActionResult Add([FromBody] Comment comment)
+        public IActionResult Delete(int id)
         {
-            if (comment == null)
-            {
-                return BadRequest("Yorum satırı boş lütfen yorum yazınız.");
-            }
-
-            var comments = _commentService.AddComment(comment); // Yorum eklendikten sonra aynı linke ait tüm yorumlar
-            return Ok(comments.ToList()); //Yorumları görüntülemek için bir View döndürüyoruz
+            _commentService.DeleteComment(id);
+            return RedirectToAction("Index");
         }
 
     }

@@ -11,7 +11,7 @@ namespace LinkStorage.Web.Controllers
     [Authorize(Roles = "Admin")] // Sadece admin kullanıcılar erişebilsin
     public class CategoryController : Controller
     {
-        public readonly ICategoryService _categoryService;
+        private readonly ICategoryService _categoryService;
 
         public CategoryController(ICategoryService categoryService)
         {

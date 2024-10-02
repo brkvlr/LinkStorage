@@ -1,0 +1,67 @@
+﻿@model IEnumerable<LinkStorage.Models.Comment>
+
+@{
+    ViewData["Title"] = "Yorum Yönetimi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Yorum Yönetimi</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Yorumlar
+        </div>
+        <div class="card-body">
+            <table id="commentsTable" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Yorum</th>
+                        <th>Kullanıcı ID</th>
+                        <th>Link ID</th>
+                        <th>Tarih</th>
+                        <th>Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var comment in Model)
+                    {
+                        <tr>
+                            <td>@comment.Id</td>
+                            <td>@comment.Text</td>
+                            <td>@comment.UserId</td>
+                            <td>@comment.LinkId</td>
+                            <td>@comment.DateCreated</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm delete-comment" data-id="@comment.Id">Sil</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).on('click', '.delete-comment', function () {
+            var commentId = $(this).data('id');
+            if (confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Comment")',
+                    type: 'POST',
+                    data: { id: commentId },
+                    success: function (result) {
+                        location.reload(); // Başarıyla silindiğinde sayfayı yenile
+                    },
+                    error: function (error) {
+                        alert('Yorum silinirken bir hata oluştu.');
+                    }
+                });
+            }
+        });
+    </script>
+}

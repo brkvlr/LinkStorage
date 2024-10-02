@@ -11,7 +11,7 @@
     <!-- App favicon -->
     <link rel="shortcut icon" href="~/assets/images/favicon.ico">
 
-        <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/libs/toastr/build/toastr.min.css">
     <link href="~/assets/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
 
     <!-- Bootstrap Css -->
@@ -324,7 +324,27 @@
                             <li>
                                 <a asp-controller="User" asp-action="Index">
                                     <i class="uil-home-alt"></i>
-                                    <span>Kullanıcılar</span>
+                                    <span>Kullanıcı Yönetimi</span>
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.HasClaim(c => c.Type == "UserTypeId" && c.Value == "1"))
+                        {
+                            <li>
+                                <a asp-controller="Link" asp-action="Index">
+                                    <i class="uil-home-alt"></i>
+                                    <span>Link Yönetimi</span>
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.HasClaim(c => c.Type == "UserTypeId" && c.Value == "1"))
+                        {
+                            <li>
+                                <a asp-controller="Comment" asp-action="Index">
+                                    <i class="uil-home-alt"></i>
+                                    <span>Yorum Yönetimi</span>
                                 </a>
                             </li>
                         }
@@ -335,6 +355,16 @@
                                 <a asp-controller="Category" asp-action="Index">
                                     <i class="uil-home-alt"></i>
                                     <span>Kategoriler</span>
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.HasClaim(c => c.Type == "UserTypeId" && c.Value == "1"))
+                        {
+                            <li>
+                                <a asp-controller="Tag" asp-action="Index">
+                                    <i class="uil-home-alt"></i>
+                                    <span>Etiket Yönetimi</span>
                                 </a>
                             </li>
                         }
@@ -407,7 +437,7 @@
     <script src="~/assets/libs/jquery.counterup/jquery.counterup.min.js"></script>
     <script src="~/assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
     <script src="~/assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <!-- App js -->
     <script src="~/assets/js/app.js"></script>
 

@@ -24,6 +24,16 @@ namespace LinkStorage.Business.Concrete
             _httpContextAccessor = httpContextAccessor;
         }
 
+        public IEnumerable<Comment> GetAllComments()
+        {
+            return _repository.GetAll(); // Tüm yorumları getir
+        }
+
+        public void DeleteComment(int id)
+        {
+            _repository.Delete(id); // ID'yi direkt olarak gönderiyoruz
+        }
+
         // Yorum ekleme ve göreve ait tüm yorumları döndürme işlemi
         public IQueryable<Comment> AddComment(Comment comment)
         {

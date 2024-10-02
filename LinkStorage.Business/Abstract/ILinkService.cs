@@ -1,4 +1,5 @@
-﻿using LinkStorage.Models;
+﻿using LinkStorage.Business.Shared.Abstract;
+using LinkStorage.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,11 @@ using System.Threading.Tasks;
 
 namespace LinkStorage.Business.Abscract
 {
-    public interface ILinkService
+    public interface ILinkService : IService<Link>
     {
-       public IQueryable<Link> GetAllLinks();
-       public Link GetLinkById(int id);
-       public Link Add(Link link);
-        public Link Update(Link link);
-        public bool Delete(int id);
+        IQueryable<Link> GetAllLinks();
+        Link Add(Link link);
+        Link Update(Link link);
+        bool Delete(int id);
     }
 }

@@ -1,4 +1,6 @@
 ﻿using LinkStorage.Business.Abscract;
+using LinkStorage.Business.Abstract;
+using LinkStorage.Business.Concrete;
 using LinkStorage.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,15 +11,24 @@ namespace LinkStorage.Web.Controllers
     public class LinkController : Controller
     {
         private readonly ILinkService _linkService;
+        private readonly ICategoryService _categoryService;
+        private readonly ITagService _tagService;
 
-        public LinkController(ILinkService linkService)
+        public LinkController(ILinkService linkService, ICategoryService categoryService, ITagService tagService)
         {
             _linkService = linkService;
+            _categoryService = categoryService;
+            _tagService = tagService;
         }
 
         public IActionResult Index()
         {
-            return View();
+            var links = _linkService.GetAllLinks().ToList();
+            var categories = _categoryService.GetAllCategories().ToList();
+
+            ViewBag.Categories = categories; 
+
+            return View(links);
         }
 
         public IActionResult GetAll()
@@ -28,7 +39,7 @@ namespace LinkStorage.Web.Controllers
 
         public IActionResult GetById(int id)
         {
-            var link = _linkService.GetLinkById(id);
+            var link = _linkService.GetById(id);
             return Ok(link);
         }
 
@@ -39,26 +50,56 @@ namespace LinkStorage.Web.Controllers
             return RedirectToAction("Index");
         }
 
+        public IActionResult Edit(int id)
+        {
+            var link = _linkService.GetById(id); // Linki ID'sine göre al
+            if (link == null)
+            {
+                return NotFound(); // Link bulunamazsa hata döndür
+            }
+
+            ViewBag.Categories = _categoryService.GetAllCategories(); // Kategorileri görünüm için ayarlayın
+
+            // Tags'ları bir string olarak virgülle ayırarak gönderebilirsiniz
+            ViewBag.Tags = string.Join(", ", link.Tags.Select(t => t.Name)); // Tags'ı al
+            return View(link); // Link modelini görünümde gönder
+        }
+
         [HttpPost]
         public IActionResult Update(Link link)
         {
-            _linkService.Update(link);
+            if (ModelState.IsValid)
+            {
+                try
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An error occurred while updating the link: " + ex.Message);
+                    Console.WriteLine(ex);
+                }
+            }
+
+            ViewBag.Categories = _categoryService.GetAllCategories();
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            bool isDeleted = _linkService.Delete(id);
-
-            if (isDeleted)
+            try
             {
-                return RedirectToAction("Index");
+                _linkService.Delete(id);
+                _tagService.DeleteTag(id);
+                return Json(new { success = true });
             }
-            else
+            catch (Exception ex)
             {
-                return View("Error");
+                return Json(new { success = false, message = ex.Message });
             }
         }
+
+
     }
 }
