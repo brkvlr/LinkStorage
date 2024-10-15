@@ -11,7 +11,10 @@ namespace LinkStorage.Business.Abscract
     public interface ICommentService : IService<Comment>
     {
         IEnumerable<Comment> GetAllComments();
-        void DeleteComment(int id);
-        IQueryable<Comment> AddComment(Comment comment);
+        bool DeleteComment(int id);
+        Comment GetCommentById(int id);
+        Comment Add(Comment comment);
+
+        IEnumerable<Comment> GetCommentsByLinkId(int linkId);
     }
 }

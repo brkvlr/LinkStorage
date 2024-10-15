@@ -21,7 +21,7 @@ namespace LinkStorage.Business.Concrete
 
             public IQueryable<AppUserType> GetAllType()
             {
-                return _userTypeRepository.GetAll(u => u.Id != 1);
+                return _userTypeRepository.GetAll();
             }
         }
     }

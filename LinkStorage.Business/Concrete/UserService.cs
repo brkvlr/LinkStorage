@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace LinkStorage.Business.Concrete
 {
@@ -22,6 +23,7 @@ namespace LinkStorage.Business.Concrete
         }
 
 
+
         public AppUser CheckLogin(AppUser user)
         {
             return _repository.GetAll().Include(p => p.UserType).Where(p => (p.Email == user.UserName || p.UserName == user.UserName) && p.Password == user.Password).FirstOrDefault();
@@ -32,6 +34,7 @@ namespace LinkStorage.Business.Concrete
         {
             return await Task.Run(() => _repository.Add(user));
         }
+
 
         public async Task<AppUser?> Register(AppUser user)
         {
@@ -53,21 +56,23 @@ namespace LinkStorage.Business.Concrete
 
         public IQueryable<AppUser> GetAll()
         {
-            return _repository.GetAll()
+            return _repository.GetAll(u => u.IsDeleted == false)
+                .Include(u => u.UserType)
                 .Select(x => new AppUser
                 {
                     Id = x.Id,
                     UserName = x.UserName,
                     Email = x.Email,
-                    Password = x.Password,
                     UserType = x.UserType,
-                    IsDeleted = x.IsDeleted
+                    UserTypeId = x.UserTypeId,
+                    IsDeleted = x.IsDeleted,
                 });
         }
 
+
         public AppUser Profile()
         {
-            throw new NotImplementedException("Profil bilgilerini almak için mevcut kullanıcı tanımlanmalıdır.");
+            return _repository.GetById(int.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value));
         }
 
         public async Task<bool> NewUserPassword(string mail)
@@ -96,5 +101,7 @@ namespace LinkStorage.Business.Concrete
                 return false;
             }
         }
+
+
     }
 }

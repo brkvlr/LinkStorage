@@ -1,0 +1,142 @@
+﻿@using LinkStorage.Business
+@model IEnumerable<Link>
+
+<div class="row">
+    @foreach (var link in Model)
+    {
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center">
+                            <img src="~/assets/images/users/avatar-6.jpg" alt="@link.User.UserName" class="rounded-circle me-2" style="width: 40px; height: 40px;" />
+                            <div>
+                                <h5 class="card-title mb-0">@link.User.UserName</h5>
+                                <small class="text-muted">@link.DateCreated.ToTimeAgo()</small>
+                            </div>
+                        </div>
+                        @if (User.IsInRole("Admin") || User.HasClaim("UserId", link.UserId.ToString()))
+                        {
+                            <form asp-action="Delete" asp-controller="Link" method="post" onsubmit="return confirm('Bu linki silmek istediğinizden emin misiniz?');">
+                                <input type="hidden" name="id" value="@link.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm">Sil</button>
+                            </form>
+                        }
+                    </div>
+
+                    <h4 class="mb-2">
+                        <a href="@link.Url" class="card-link" target="_blank">@link.Url</a>
+                    </h4>
+                    <p class="card-text mb-2">@link.Description</p>
+
+                    <div class="mb-2">
+                        <span class="badge bg-primary">@link.Category.Name</span>
+                        @foreach (var tag in link.Tags.Where(t => !t.IsDeleted))
+                        {
+                            <span class="badge bg-secondary ms-1">#@tag.Name</span>
+                        }
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>Yorumlar:</h6>
+                        <div id="comments-@link.Id">
+                            @await Html.PartialAsync("_CommentList", link.Comments.Where(c => c.ParentCommentId == null).OrderByDescending(c => c.DateCreated))
+                        </div>
+                        <form class="mt-2 comment-form" data-link-id="@link.Id">
+                            <div class="input-group">
+                                <input type="text" class="form-control comment-input" placeholder="Yorum yaz...">
+                                <button class="btn btn-primary" type="submit">Gönder</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        // Yeni yorum ekleme
+        $('.comment-form').submit(function (e) {
+
+            e.preventDefault();
+            var form = $(this);
+            var linkId = form.data('link-id');
+            var commentText = form.find('.comment-input').val();
+            console.log("Gönderilen yorum: ", commentText); 
+            $.ajax({
+                url: '@Url.Action("Add", "Comment")',
+                type: 'POST',
+                data: { linkId: linkId, text: commentText },
+                success: function (result) {
+                    $('#comments-' + linkId).prepend(result);
+                    form.find('.comment-input').val('');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Yorum eklenirken hata oluştu:", error);
+                    alert("Yorum eklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+                }
+            });
+        });
+
+        // Yanıtla butonu işlevi
+        $(document).on('click', '.reply-button', function () {
+            var commentId = $(this).data('comment-id');
+            var replyForm = $('<form class="mt-2 reply-form" data-parent-id="' + commentId + '">' +
+                '<div class="input-group">' +
+                '<input type="text" class="form-control reply-input" placeholder="Yanıt yaz...">' +
+                '<button class="btn btn-primary" type="submit">Gönder</button>' +
+                '</div>' +
+                '</form>');
+            $(this).after(replyForm);
+            $(this).hide();
+        });
+
+        // Yanıt gönderme
+        $(document).on('submit', '.reply-form', function (e) {
+            e.preventDefault();
+            var form = $(this);
+            var parentId = form.data('parent-id');
+            var linkId = form.closest('.card').find('.comment-form').data('link-id');
+            var replyText = form.find('.reply-input').val();
+
+            $.ajax({
+                url: '@Url.Action("Add", "Comment")',
+                type: 'POST',
+                data: { linkId: linkId, text: replyText, parentCommentId: parentId },
+                success: function (result) {
+                    form.closest('.comment').find('.replies').first().prepend(result);
+                    form.remove();
+                    $('.reply-button[data-comment-id="' + parentId + '"]').show();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Yanıt eklenirken hata oluştu:", error);
+                    alert("Yanıt eklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+                }
+            });
+        });
+
+        // Yorum silme
+        $(document).on('click', '.delete-comment', function () {
+            var commentId = $(this).data('comment-id');
+            if (confirm('Bu yorumu silmek istediğinizden emin misiniz?')) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Comment")',
+                    type: 'POST',
+                    data: { id: commentId },
+                    success: function () {
+                        $('.comment[data-comment-id="' + commentId + '"]').remove();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Yorum silinirken hata oluştu:", error);
+                        alert("Yorum silinirken bir hata oluştu. Lütfen tekrar deneyin.");
+                    }
+                });
+            }
+        });
+    });
+</script>

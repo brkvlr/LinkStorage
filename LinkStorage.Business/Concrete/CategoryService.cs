@@ -26,6 +26,7 @@ namespace LinkStorage.Business.Concrete
             if (category != null)
             {
                 _repository.Add(category);
+                _repository.Save();
             }
         }
 

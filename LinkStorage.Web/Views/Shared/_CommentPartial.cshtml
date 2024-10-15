@@ -1,0 +1,27 @@
+﻿@using LinkStorage.Business
+@model Comment
+
+<div class="comment mb-3" data-comment-id="@Model.Id">
+    <div class="d-flex">
+        <img src="~/assets/images/users/avatar-6.jpg" alt="@Model.User.UserName" class="rounded-circle me-2" style="width: 32px; height: 32px;">
+        <div class="flex-grow-1">
+            <strong>@Model.User.UserName</strong>
+            <small class="text-muted">@Model.DateCreated.ToTimeAgo()</small>
+            <p class="mb-1">@Model.Text</p>
+            @if (Model.ParentCommentId == null)
+            {
+                <button class="btn btn-sm btn-link p-0 reply-button" data-comment-id="@Model.Id">Yanıtla</button>
+            }
+            @if (User.IsInRole("Admin") || User.HasClaim("UserId", Model.UserId.ToString()))
+            {
+                <button class="btn btn-sm btn-link p-0 text-danger delete-comment ms-2" data-comment-id="@Model.Id">Sil</button>
+            }
+        </div>
+    </div>
+    @if (Model.ParentCommentId == null)
+    {
+        <div class="replies ms-4 mt-2">
+
+        </div>
+    }
+</div>

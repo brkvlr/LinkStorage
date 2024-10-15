@@ -19,6 +19,7 @@ namespace LinkStorage.Models
         [Required(ErrorMessage = "Şifre gereklidir.")]
         [MinLength(3, ErrorMessage = "Şifre en az 3 karakter olmalıdır.")]
         public string? Password { get; set; }
+        [ForeignKey("UserTypeId")]
         public int UserTypeId { get; set; }
         public virtual AppUserType? UserType { get; set; }
         public ICollection<Link> Links { get; set; } = [];

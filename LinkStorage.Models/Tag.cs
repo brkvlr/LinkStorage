@@ -9,6 +9,6 @@ namespace LinkStorage.Models
     public class Tag : BaseModel
     {
         public string Name { get; set; }
-        public ICollection<Link> Links { get; set; }
+        public ICollection<Link> Links { get; set; } = new List<Link>();
     }
 }

@@ -10,7 +10,7 @@
 
     <div class="card mb-4">
         <div class="card-header">
-            <i class="fas fa-table me-1"></i> Etiketler
+            <i class="fas fa-tag me-1"></i> Etiketler
         </div>
         <div class="card-body">
             <table id="tagsTable" class="table table-bordered">
@@ -18,7 +18,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Etiket Adı</th>
-                        <th>Eylemler</th>
+                        <th style="width: 100px;">Eylemler</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -41,49 +41,54 @@
 @section Scripts {
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.24/dataRender/ellipsis.js"></script>
 
     <script>
         $(document).ready(function () {
-            $('#tagsTable').DataTable();
+            $('#tagsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Turkish.json"
+                }
+            });
 
-                $(document).on('click', '.delete-tag', function () {
-        var tagId = $(this).data('id');
-        console.log('Silme butonuna basıldı. ID: ' + tagId); // Butona basıldığını kontrol eder
+            $(document).on('click', '.delete-tag', function () {
+                var tagId = $(this).data('id');
+                console.log('Silme butonuna basıldı. ID: ' + tagId); 
 
-        Swal.fire({
-            title: 'Emin misiniz?',
-            text: "Bu etiket silinecek!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Evet, sil!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '@Url.Action("Delete", "Tag")',
-                    type: 'POST',
-                    data: { id: tagId },
-                    success: function () {
-                        Swal.fire(
-                            'Silindi!',
-                            'Etiket başarıyla silindi.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
+                Swal.fire({
+                    title: 'Emin misiniz?',
+                    text: "Bu etiket silinecek!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Evet, sil!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("Delete", "Tag")',
+                            type: 'POST',
+                            data: { id: tagId },
+                            success: function () {
+                                Swal.fire(
+                                    'Silindi!',
+                                    'Etiket başarıyla silindi.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function () {
+                                Swal.fire(
+                                    'Hata!',
+                                    'Etiket silinirken bir hata oluştu.',
+                                    'error'
+                                );
+                            }
                         });
-                    },
-                    error: function () {
-                        Swal.fire(
-                            'Hata!',
-                            'Etiket silinirken bir hata oluştu.',
-                            'error'
-                        );
                     }
                 });
-            }
-        });
-    });
+            });
         });
     </script>
 }

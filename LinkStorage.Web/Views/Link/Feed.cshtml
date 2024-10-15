@@ -1,0 +1,70 @@
+﻿@model IEnumerable<Link>
+@{
+    ViewData["Title"] = "Link Feed";
+}
+
+<div class="container mt-4">
+    <h1>Link Feed</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form id="filterForm" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <input type="text" id="searchQuery" name="searchQuery" class="form-control" placeholder="Url ara...">
+                    </div>
+                    <div class="col-md-3">
+                        <select id="categoryId" name="categoryId" class="form-control">
+                            <option value="">Tüm kategoriler</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="tagIds" name="tagIds" class="form-control select2-multiple" multiple>
+                            @foreach (var tag in ViewBag.Tags)
+                            {
+                                <option value="@tag.Id">@tag.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">Ara</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="linkContainer">
+        @await Html.PartialAsync("_LinkList", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.select2-multiple').select2({
+                placeholder: "Etiketleri seçin",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#filterForm').submit(function (e) {
+                e.preventDefault();
+                var form = $(this);
+                $.ajax({
+                    url: '@Url.Action("FilterLinks", "Link")',
+                    type: 'GET',
+                    data: form.serialize(),
+                    success: function (result) {
+                        $('#linkContainer').html(result);
+                    }
+                });
+            });
+        });
+    </script>
+}

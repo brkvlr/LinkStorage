@@ -20,10 +20,11 @@ namespace LinkStorage.Business.Concrete
             _repository = repository;
         }
 
-        public void AddTag(Tag tag)
+        public void AddTag(string tagName)
         {
+            // Tag ekleme işlemi
+            var tag = new Tag { Name = tagName };
             _repository.Add(tag);
-            _repository.Save();
         }
 
         public IEnumerable<Tag> GetAllTags()
@@ -39,6 +40,27 @@ namespace LinkStorage.Business.Concrete
                 _repository.Delete(tag.Id);
                 _repository.Save();
             }
+        }
+
+        public List<Tag> GetTagsByIds(List<int> tagIds)
+        {
+            // Yalnızca ilgili ID'lere sahip tag'leri çekin
+            return _repository.GetAll().Where(tag => tagIds.Contains(tag.Id)).ToList();
+        }
+
+        public List<Tag> CreateNewTags(List<string> tagNames)
+        {
+            var existingTags = _repository.GetAll().Where(t => tagNames.Contains(t.Name)).ToList();
+            var newTagNames = tagNames.Except(existingTags.Select(t => t.Name)).ToList();
+
+            foreach (var newTagName in newTagNames)
+            {
+                var newTag = new Tag { Name = newTagName };
+                _repository.Add(newTag);
+            }
+            _repository.Save();
+
+            return _repository.GetAll().Where(t => tagNames.Contains(t.Name)).ToList();
         }
     }
 }

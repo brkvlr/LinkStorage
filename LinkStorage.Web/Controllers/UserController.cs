@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using LinkStorage.Business.Concrete;
 
 namespace LinkStorage.Web.Controllers
 {
@@ -12,10 +13,12 @@ namespace LinkStorage.Web.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
+        private readonly IUserTypeService _userTypeService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IUserTypeService userTypeService)
         {
             _userService = userService;
+            _userTypeService = userTypeService;
         }
 
         [Authorize(Roles = "Admin")]
@@ -47,20 +50,21 @@ namespace LinkStorage.Web.Controllers
                 ModelState.AddModelError("UserName", "Bu kullanıcı adı zaten kullanılıyor.");
                 return View(user);
             }
-            if (ModelState.IsValid)
-            {
-                user.UserTypeId = 2;
-                _userService.Add(user);
+            user.UserTypeId = 2;
 
-                // E-posta gönderme işlemi vb.
+            var result = await _userService.Register(user);
+
+            if (result != null)
+            {
                 TempData["success"] = "Kayıt başarılı!";
                 return RedirectToAction("Index", "Home");
             }
 
-            return View(user); // Hatalı durumda kullanıcı bilgilerini geri gönder
+            TempData["error"] = "Kayıt sırasında bir hata oluştu.";
+            return View(user);
         }
 
-    [AllowAnonymous]
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
@@ -73,15 +77,19 @@ namespace LinkStorage.Web.Controllers
 
             if (user != null)
             {
-                AppUser appUser = _userService.CheckLogin(user); // Kullanıcıyı kontrol et
-                if (appUser != null) // Kullanıcı bulunduysa
+                AppUser appUser = _userService.CheckLogin(user); 
+                if (appUser != null) 
                 {
                     List<Claim> claims = new List<Claim>();
                     claims.Add(new Claim(ClaimTypes.NameIdentifier, appUser.Id.ToString()));
                     claims.Add(new Claim(ClaimTypes.Email, appUser.Email));
                     claims.Add(new Claim("UserTypeId", appUser.UserTypeId.ToString()));
                     claims.Add(new Claim(ClaimTypes.Role, appUser.UserType.Name));
+                    claims.Add(new Claim(ClaimTypes.Name, appUser.UserName));
 
+                    var identity = new ClaimsIdentity(claims, "Login");
+                    var principal = new ClaimsPrincipal(identity);
+                    await HttpContext.SignInAsync(principal);
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties { IsPersistent = true });
@@ -114,10 +122,29 @@ namespace LinkStorage.Web.Controllers
             return RedirectToAction("Login");
         }
 
+        [HttpGet]
         public IActionResult GetAll()
         {
+            try
+            {
+                var users = _userService.GetAll().ToList();
+                var userTypes = _userTypeService.GetAllType().ToDictionary(ut => ut.Id, ut => ut.Name);
 
-            return Json(new { data = _userService.GetAll() });
+                var result = users.Select(u => new
+                {
+                    u.Id,
+                    u.UserName,
+                    u.Email,
+                    u.UserTypeId,
+                    UserTypeName = userTypes.ContainsKey(u.UserTypeId) ? userTypes[u.UserTypeId] : "Bilinmeyen"
+                });
+
+                return Json(new { data = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -126,7 +153,7 @@ namespace LinkStorage.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _userService.Add(user); // Kullanıcıyı kaydet
+                _userService.Add(user); 
                 return Json(new { success = true });
             }
             return Json(new { success = false });
@@ -147,14 +174,14 @@ namespace LinkStorage.Web.Controllers
             if (!ModelState.IsValid)
             {
                 var existingUser = _userService.GetById(user.Id);
-                return View(existingUser); // Hata durumunda mevcut kullanıcıyı geri döndür
+                return View(existingUser); 
             }
 
             var existingUserInDb = _userService.GetById(user.Id);
 
             if (string.IsNullOrEmpty(user.Password))
             {
-                user.Password = existingUserInDb.Password; // Mevcut şifreyi koru
+                user.Password = existingUserInDb.Password; 
             }
 
              _userService.Update(user);
@@ -200,6 +227,17 @@ namespace LinkStorage.Web.Controllers
             return Json(_userService.GetById(id));
         }
 
+        public IActionResult Profile()
+        {
+            return View(_userService.Profile());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(AppUser user)
+        {
+            return RedirectToAction("Profile", "User");
+        }
+
         [AllowAnonymous]
         public IActionResult Password()
         {
@@ -221,13 +259,6 @@ namespace LinkStorage.Web.Controllers
                 TempData["error"] = "Şifre Yenileme İşlemi Başarısızdır.";
                 return RedirectToAction("password");
             }
-        }
-
-            [AllowAnonymous]
-        public IActionResult Profile()
-        {
-            var user = _userService.Profile();
-            return View(user);
         }
     }
 }

@@ -1,0 +1,30 @@
+﻿@using LinkStorage.Business
+@model IEnumerable<Comment>
+
+@foreach (var comment in Model)
+{
+    <div class="comment mb-3" data-comment-id="@comment.Id">
+        <div class="d-flex">
+            <img src="~/assets/images/users/avatar-6.jpg" alt="@comment.User.UserName" class="rounded-circle me-2" style="width: 32px; height: 32px;">
+            <div class="flex-grow-1">
+                <strong>@comment.User.UserName</strong>
+                <small class="text-muted">@comment.DateCreated.ToTimeAgo()</small>
+                <p class="mb-1">@comment.Text</p>
+                @if (comment.ParentCommentId == null)
+                {
+                    <button class="btn btn-sm btn-link p-0 reply-button" data-comment-id="@comment.Id">Yanıtla</button>
+                }
+                @if (User.IsInRole("Admin") || User.HasClaim("UserId", comment.UserId.ToString()))
+                {
+                    <button class="btn btn-sm btn-link p-0 text-danger delete-comment ms-2" data-comment-id="@comment.Id">Sil</button>
+                }
+            </div>
+        </div>
+        @if (comment.Replies != null && comment.Replies.Any())
+        {
+            <div class="replies ms-4 mt-2">
+                @await Html.PartialAsync("_CommentList", comment.Replies.OrderByDescending(r => r.DateCreated))
+            </div>
+        }
+    </div>
+}

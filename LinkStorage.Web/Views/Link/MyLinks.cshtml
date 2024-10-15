@@ -1,0 +1,238 @@
+﻿@model IEnumerable<Link>
+
+<h2>Link Listem</h2>
+
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLinkModal">Link Ekle</button>
+
+@if (Model == null || !Model.Any())
+{
+    <p>Henüz hiçbir link paylaşmadınız.</p>
+}
+else
+{
+    <table id="linkTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>URL</th>
+                <th>Açıklama</th>
+                <th>Kategori</th>
+                <th>Etiketler</th>
+                <th>Tarih</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var link in Model)
+            {
+                <tr>
+                    <td>@link.Id</td>
+                    <td><a href="@link.Url" target="_blank">@link.Url</a></td>
+                    <td>@link.Description</td>
+                    <td>@link.Category?.Name</td>
+                    <td>
+                        @if (link.Tags != null && link.Tags.Any())
+                        {
+                            @foreach (var tag in link.Tags)
+                            {
+                                <span class="badge bg-primary">@tag.Name</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Yok</span>
+                        }
+                    </td>
+                    <td>@link.DateCreated.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editLink(@link.Id)">Düzenle</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteLink(@link.Id)">Sil</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Link Add Modal -->
+<div class="modal fade" id="addLinkModal" tabindex="-1" aria-labelledby="addLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLinkModalLabel">Yeni Link Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addLinkForm">
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL</label>
+                        <input type="url" class="form-control" id="url" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Açıklama</label>
+                        <textarea class="form-control" id="description" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">Kategori</label>
+                        <select class="form-select" id="categoryId" required>
+                            <option value="">Kategori seçin</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Etiketler (virgülle ayırın)</label>
+                        <input type="text" class="form-control" id="tags" placeholder="Etiketleri virgül ile ayırarak yazın">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Link Edit Modal -->
+<div class="modal fade" id="editLinkModal" tabindex="-1" aria-labelledby="editLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editLinkModalLabel">Link Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editLinkForm">
+                    <input type="hidden" id="editLinkId">
+                    <div class="mb-3">
+                        <label for="editUrl" class="form-label">URL</label>
+                        <input type="url" class="form-control" id="editUrl" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label">Açıklama</label>
+                        <textarea class="form-control" id="editDescription" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCategoryId" class="form-label">Kategori</label>
+                        <select class="form-select" id="editCategoryId" required>
+                            <option value="">Kategori seçin</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTags" class="form-label">Etiketler (virgülle ayırın)</label>
+                        <input type="text" class="form-control" id="editTags" placeholder="Etiketleri virgül ile ayırarak yazın">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#linkTable').DataTable();
+
+            $('#addLinkForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var url = $('#url').val();
+                var description = $('#description').val();
+                var categoryId = $('#categoryId').val();
+                var tags = $('#tags').val();
+
+                $.ajax({
+                    url: '@Url.Action("AddLink", "Link")',
+                    type: 'POST',
+                    data: {
+                        url: url,
+                        description: description,
+                        categoryId: categoryId,
+                        tags: tags
+                    },
+                    success: function(response) {
+                        console.log("Link eklendi:", response);
+                        $('#addLinkModal').modal('hide');
+                        window.location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Ekleme hatası:", error);
+                        alert("Link eklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+                    }
+                });
+            });
+
+            $('#editLinkForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var id = $('#editLinkId').val();
+                var url = $('#editUrl').val();
+                var description = $('#editDescription').val();
+                var categoryId = $('#editCategoryId').val();
+                var tags = $('#editTags').val();
+
+                $.ajax({
+                    url: '@Url.Action("UpdateLink", "Link")',
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        url: url,
+                        description: description,
+                        categoryId: categoryId,
+                        tags: tags
+                    },
+                    success: function(response) {
+                        console.log("Link güncellendi:", response);
+                        $('#editLinkModal').modal('hide');
+                        window.location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Güncelleme hatası:", error);
+                        alert("Link güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
+                    }
+                });
+            });
+        });
+
+        function editLink(linkId) {
+            $.ajax({
+                url: '@Url.Action("GetLink", "Link")/' + linkId,
+                type: 'GET',
+                success: function(link) {
+                    $('#editLinkId').val(link.id);
+                    $('#editUrl').val(link.url);
+                    $('#editDescription').val(link.description);
+                    $('#editCategoryId').val(link.categoryId);
+                    $('#editTags').val(link.tags.map(tag => tag.name).join(', '));
+                    $('#editLinkModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Link bilgisi alınamadı:", error);
+                    alert("Link bilgisi alınırken bir hata oluştu. Lütfen tekrar deneyin.");
+                }
+            });
+        }
+
+        function deleteLink(linkId) {
+            if (confirm("Bu bağlantıyı silmek istediğinize emin misiniz?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteLink", "Link")/' + linkId,
+                    type: 'POST',
+                    success: function(result) {
+                        console.log("Silme işlemi başarılı!");
+                        window.location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Silme hatası:", error);
+                        alert("Link silinirken bir hata oluştu. Lütfen tekrar deneyin.");
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -10,8 +10,10 @@ namespace LinkStorage.Business.Abstract
 {
     public interface ITagService : IService<Tag>
     {
-        void AddTag(Tag tag);
+        void AddTag(string tag);
         IEnumerable<Tag> GetAllTags();
         void DeleteTag(int id);
+        List<Tag> GetTagsByIds(List<int> tagIds);
+        List<Tag> CreateNewTags(List<string> tagNames);
     }
 }

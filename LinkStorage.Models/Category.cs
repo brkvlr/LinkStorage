@@ -13,6 +13,6 @@ namespace LinkStorage.Models
     {
         [Required(ErrorMessage = "Kategori adı boş olamaz.")]
         public string Name { get; set; }
-        public ICollection<Link> Links { get; set; }
+        public ICollection<Link> Links { get; set; } = new List<Link>();
     }
 }

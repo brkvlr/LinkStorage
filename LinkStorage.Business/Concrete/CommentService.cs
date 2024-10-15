@@ -17,11 +17,13 @@ namespace LinkStorage.Business.Concrete
     {
         private readonly IRepository<Comment> _repository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserService _userService;
 
-        public CommentService(IRepository<Comment> repository, IHttpContextAccessor httpContextAccessor) : base(repository)
+        public CommentService(IRepository<Comment> repository, IHttpContextAccessor httpContextAccessor, IUserService userService) : base(repository)
         {
             _repository = repository;
             _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
         }
 
         public IEnumerable<Comment> GetAllComments()
@@ -29,22 +31,75 @@ namespace LinkStorage.Business.Concrete
             return _repository.GetAll(); // Tüm yorumları getir
         }
 
-        public void DeleteComment(int id)
+        //public void DeleteComment(int id)
+        //{
+        //    _repository.Delete(id); // ID'yi direkt olarak gönderiyoruz
+        //}
+
+        public Comment Add(Comment comment)
         {
-            _repository.Delete(id); // ID'yi direkt olarak gönderiyoruz
+            try
+            {
+                _repository.Add(comment);
+                _repository.Save();
+                return comment;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error adding comment: {ex.Message}");
+                return null;
+            }
         }
 
-        // Yorum ekleme ve göreve ait tüm yorumları döndürme işlemi
-        public IQueryable<Comment> AddComment(Comment comment)
+        public IEnumerable<Comment> GetCommentsByLinkId(int linkId)
         {
-            comment.UserId = int.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            _repository.Add(comment);
-            return _repository.GetAll(c => c.LinkId == comment.LinkId).Include(c => c.User);
+            return _repository.GetAll()
+                .Where(c => c.LinkId == linkId && c.ParentCommentId == null && !c.IsDeleted)
+                .Include(c => c.User)
+                .Include(c => c.Replies)
+                    .ThenInclude(r => r.User)
+                .OrderByDescending(c => c.DateCreated)
+                .ToList();
         }
 
         public Comment GetCommentById(int id)
         {
-            return _repository.GetById(id);
+            return _repository.GetAll()
+                .Include(c => c.User)
+                .FirstOrDefault(c => c.Id == id);
+        }
+
+        public bool DeleteComment(int id)
+        {
+            try
+            {
+                var comment = _repository.GetById(id);
+                if (comment != null)
+                {
+                    DeleteReplies(comment);
+                    _repository.Delete(id);
+                    _repository.Save();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error deleting comment: {ex.Message}");
+                return false;
+            }
+        }
+
+        private void DeleteReplies(Comment comment)
+        {
+            var replies = _repository.GetAll().Where(c => c.ParentCommentId == comment.Id).ToList();
+            foreach (var reply in replies)
+            {
+                DeleteReplies(reply);
+                _repository.Delete(reply.Id);
+            }
         }
     }
 }

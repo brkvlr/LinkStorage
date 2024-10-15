@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkStorage.Business", "Lin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkStorage.Models", "LinkStorage.Models\LinkStorage.Models.csproj", "{7730E8E3-B441-4ABE-9671-7CDF3E1AA725}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkStorage.Utility", "LinkStorage.Utility\LinkStorage.Utility.csproj", "{89AFD3F2-FA96-47BB-BACF-F94278EC0AE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkStorage.Utility", "LinkStorage.Utility\LinkStorage.Utility.csproj", "{89AFD3F2-FA96-47BB-BACF-F94278EC0AE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

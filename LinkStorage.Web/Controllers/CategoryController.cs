@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LinkStorage.Web.Controllers
 {
-    [Authorize(Roles = "Admin")] // Sadece admin kullanıcılar erişebilsin
+    [Authorize(Roles = "Admin")] 
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
@@ -29,7 +29,6 @@ namespace LinkStorage.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Eğer Id 0'dan büyükse, güncelleme işlemi yapın
                 if (category.Id > 0)
                 {
                     _categoryService.UpdateCategory(category);
